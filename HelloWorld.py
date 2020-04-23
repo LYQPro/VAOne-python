@@ -290,7 +290,7 @@ from abc import ABCMeta, abstractmethod
 from random import randint, randrange
 
 
-class Fighter(object, metaclass=ABCMeta):  #一个抽象类
+class Fighter(object, metaclass=ABCMeta):  # 一个抽象类
     """战斗者"""
 
     # 通过__slots__魔法限定对象可以绑定的成员变量
@@ -321,7 +321,7 @@ class Fighter(object, metaclass=ABCMeta):  #一个抽象类
     def alive(self):
         return self._hp > 0
 
-    @abstractmethod          
+    @abstractmethod
     def attack(self, other):
         """攻击
 

@@ -66,16 +66,19 @@
 #     with open('测试文本.txt',encoding='utf-8') as f:
 #         lines=f.readlines()
 #     print(lines)
-    
+
 # if __name__=='__main__':
 #     main()
 from json import *
+
+
 class A:
     def show(self):
         return 'mysql'
-a=A()
-f=dumps(a.show())
+
+
+a = A()
+f = dumps(a.show())
 print(f)
 print(loads(f))
 print(dir(JSONDecoder))
-    
