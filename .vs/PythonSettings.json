@@ -1,4 +1,4 @@
 {
   "TestFramework": "Pytest",
-  "Interpreter": "Global|VisualStudio|pythonproject"
+  "Interpreter": "Global|VisualStudio|Python36"
 }

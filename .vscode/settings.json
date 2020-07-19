@@ -1,6 +1,6 @@
 {
     "draw_white_space": "all",
-    "python.pythonPath": "C:\\Users\\刘永强\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
+    "python.pythonPath": "D:\\pyvirtualenv\\env3\\Scripts\\python.exe",
     "python.linting.enabled":true
 
 }
