@@ -1,5 +1,10 @@
 #import VA One module
 from VAOne import *
+import importlib
+importlib.reload(VAOne)
+import sys
+importlib.reload(sys)
+
 # import traceback
 try:
     # Sets the name of the model to be created/read
@@ -35,24 +40,24 @@ try:
             pi_fNeoDatabaseDispose(db) # Deallocates the database
             raise Exception("Cannot open database.")
 
-	# Create coordinate arrays for the points to be created
+    # Create coordinate arrays for the points to be created
     x=[0,0.2,0.5,1]
     y=[0,0.05,0.02,-0.02]
     z=[1,1.25,1.5,2]
 
-	# Create four nodes from arrays x, y, z
+    # Create four nodes from arrays x, y, z
     NodeList=new_CNode3DArray(4)
     for index in range(4):
          CNode3DArray_setitem(NodeList,index,pi_fNode3DCreate(index, x[index], y[index],z[index]))
-	# Create an orientation node
+    # Create an orientation node
     ReferenceNode = pi_fNode3DCreate(5,1.0,2.5,1.0)
-	# Create the beam
+    # Create the beam
     NewBeam = pi_fBeamCreate('New Beam', NodeList, 4, ReferenceNode)
-	# Add the beam to the current network
+    # Add the beam to the current network
     db = pi_fNeoDatabaseGetCurrent()
     Network = pi_fNeoDatabaseGetNetwork(db)
     pi_fNetworkAddNetElm(Network, pi_fConvertBeamNetElm(NewBeam))
-			
+            
     # in the end of the code If changes are to be saved
     # they should be commited to the database 
     pi_fNeoDatabaseCommit(db, False)

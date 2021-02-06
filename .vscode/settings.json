@@ -1,6 +1,6 @@
 {
     "draw_white_space": "all",
-    "python.pythonPath": "D:\\pyvirtualenv\\env3\\Scripts\\python.exe",
-    "python.linting.enabled":true
+    "python.linting.enabled": true,
+    "jupyter.jupyterCommandLineArguments": []
 
 }
