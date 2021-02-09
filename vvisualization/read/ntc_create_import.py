@@ -1,25 +1,33 @@
 from abc import abstractmethod
 from VAOne import *
 import pandas as pd
-import glv_man as glvm
-import glv_config as glvc
+import sys
+
+sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
+from vvisualization.tools import glv_man as glvm
+from vvisualization.tools import glv_config as glvc
 import traceback
-import importlib
+# import importlib
 
 # importlib.reload(glvc)
+# importlib.reload(glvm)
 
+
+global db
+db = glvm.getv("db")  # 获取跨文件全局变量
 
 """声学包抽象类"""
 
 
 class Nct(object):
-    db = glvm._getv("db")  # 获取跨文件全局变量
 
     def __init__(self, loc):
         self.type = 'Nct'
         self.loc = loc
-        self.df = self.reading()
+        self.df = self.reading()["SoftLayer1 HardLayer2"]
         self.mat = self.create()
+        self.sl = []
+        self.hl = []
 
     @abstractmethod
     def reading(self):
@@ -55,10 +63,8 @@ class Nct(object):
 
 class Fiber(Nct):
     def __init__(self, loc):
+        super().__init__(loc)
         self.type = 'Fiber'
-        self.loc = loc
-        self.df = self.reading()["SoftLayer1 HardLayer2"]
-        self.mat = self.create()
         self.trim_create()
 
     def reading(self):
@@ -101,10 +107,8 @@ class Fiber(Nct):
 
 class Foam(Nct):
     def __init__(self, loc):
+        super().__init__(loc)
         self.type = 'Foam'
-        self.loc = loc
-        self.df = self.reading()["SoftLayer1 HardLayer2"]
-        self.mat = self.create()
         self.trim_create()
 
     def reading(self):
@@ -148,19 +152,19 @@ class Foam(Nct):
 
 class isotropicsolid(Nct):
 
-    def __init__(self):
+    def __init__(self, loc):
+        super().__init__(loc)
+
+    def reading(self):
         pass
 
-    def reading():
-        pass
-
-    def create():
+    def create(self):
         pass
 
 
 if __name__ == '__main__':
-    loc1 = r'd:/Fiber.xlsx'
-    loc2 = r'd:/Foam.xlsx'
+    loc1 = r'd:/fiber.xlsx'
+    loc2 = r'd:/foam.xlsx'
     try:
         fibers = Fiber(loc1)
         foams = Foam(loc2)

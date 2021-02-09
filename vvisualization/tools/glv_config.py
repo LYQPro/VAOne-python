@@ -1,9 +1,10 @@
-#跨文件全局变量初始化
-import glv_man as glvm
-from VAOne import *
-import VAOneGUI as vagui
-import importlib
-importlib.reload(glvm)
+# 跨文件全局变量初始化
+from . import glv_man as glvm
+# from VAOne import *
+import VAOneGUI as Vagui
+
+# import importlib
+# importlib.reload(glvm)
 
 glvm._ini()
 
@@ -14,13 +15,13 @@ try:
     network = pi_fNeoDatabaseGetNetwork(db)
     env = pi_fNetworkGetAnalysisEnv(network)
     fdom = pi_fAnalysisEnvGetFreqDomain(env)
-    vagui.GUI_DoEvents()
-    vagui.GUI_ClearLog()
-    glvm._setv("db",db)
-    glvm._setv('network',network)
-    glvm._setv("env",env)
-    glvm._setv('fdom',fdom)
-    # print(glvm._getv("db"))
+    Vagui.GUI_DoEvents()
+    Vagui.GUI_ClearLog()
+    glvm.setv("db", db)
+    glvm.setv('network', network)
+    glvm.setv("env", env)
+    glvm.setv('fdom', fdom)
+    # print(glvm.getv("db"))
     print("""access database done...\nglobal variable configured.....""")
 
 except:

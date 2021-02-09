@@ -1,12 +1,11 @@
-#跨文件全局变量管理模块
+# 跨文件全局变量管理模块
 
 def _ini():
     global _dict
     _dict = {}
 
 
-def _setv(key,val):
-
+def setv(key, val):
     try:
         _dict[key] = val
         return True
@@ -14,16 +13,16 @@ def _setv(key,val):
         return False
 
 
-def _getv(key):
+def getv(key: object) -> object:
     try:
         return _dict[key]
     except KeyError:
         return "NotFound"
 
-def _delk(key):
+
+def delk(key):
     try:
         del _dict[key]
         return True
     except KeyError:
         return False
-

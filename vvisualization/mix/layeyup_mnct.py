@@ -43,8 +43,8 @@ if __name__ == '__main__':
         network = pi_fNeoDatabaseGetNetwork(db)
         env = pi_fNetworkGetAnalysisEnv(network)
         fdom = pi_fAnalysisEnvGetFreqDomain(env)
-        # vagui.GUI_DoEvents()
-        # vagui.GUI_ClearLog()
+        # Vagui.GUI_DoEvents()
+        # Vagui.GUI_ClearLog()
 
         fibers = makenct.Fiber(loc1)
         foams = makenct.Foam(loc2)
