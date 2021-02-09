@@ -13,7 +13,7 @@ import VAOneGUI as vagui
 
 
 #------------------Excel File Import And Preproccess------------------------#
-df = pd.read_excel(r'd:/123.xlsx', header=None, sheet_name="FiberDatabase")
+df = pd.read_excel(r'd:/Fiber.xlsx', header=None, sheet_name="FiberDatabase")  # 路径改为接受用户输入或用户选择文件
 df.columns = ["Name", "Density", "Flow Resistivity", "Porosity",
               "Tortuosity", "ViscousLength", "ThermalLength", "SoftLayer1 HardLayer2"]
 df.index = df["Name"]
@@ -69,10 +69,10 @@ try:
     for i in df.index:
         Fiber = FindandConvert("Fiber", i, "Material")
         if df["SoftLayer1 HardLayer2"][i] == 1:
-            NCT = pi_fTrimLayerCreate(Fiber, 0.01, air)
+            NCT = pi_fTrimLayerCreate(Fiber, 0.01, air) #软层10mm
             SoftLayer.append((NCT, i))
         else:
-            NCT = pi_fTrimLayerCreate(Fiber, 0.003, air)
+            NCT = pi_fTrimLayerCreate(Fiber, 0.003, air) #硬层3mm
             HardLayer.append((NCT, i))
 #    print(SoftLayer[0][1])
 #-------------------------Create double layer NCT-------------------------------------#
