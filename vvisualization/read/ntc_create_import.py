@@ -13,7 +13,7 @@ import traceback
 # importlib.reload(glvm)
 
 
-global db
+
 db = glvm.getv("db")  # 获取跨文件全局变量
 
 """声学包抽象类"""
@@ -42,21 +42,21 @@ class Nct(object):
         origin = pi_fNeoDatabaseFindByName(db, globals()["pi_f" + oldtype + "GetClassID"](), name)
         return globals()["pi_fConvertNeoPersist" + newtype]((pi_fConvertDBElementNeoPersist(origin)))
 
-    def trim_create(self):
+    def trim_create(self, softlayerthickness=0.01, hardlayerthickness=0.003):
         """
-        use material create trim
+        use material create trimlayer
         """
-        soft_layer = []
-        hard_layer = []
+        soft_layer = {}
+        hard_layer = {}
         air = Nct.convert("Fluid", "Air", "Fluid")
         for i in range(len(self.mat)):
             temp = Nct.convert(self.type, self.df.index[i], "Material")
             if self.df[i] == 1:
-                layer = pi_fTrimLayerCreate(temp, 0.01, air)  # 用户输入厚度
-                soft_layer.append(layer)
+                layer = pi_fTrimLayerCreate(temp, softlayerthickness, air)  # 用户输入厚度
+                soft_layer[self.df.index[i]] = layer
             if self.df[i] == 2:
-                layer = pi_fTrimLayerCreate(temp, 0.003, air)  # 用户输入厚度
-                hard_layer.append(layer)
+                layer = pi_fTrimLayerCreate(temp, hardlayerthickness, air)  # 用户输入厚度
+                hard_layer[self.df.index[i]] = layer
         self.sl = soft_layer
         self.hl = hard_layer
 

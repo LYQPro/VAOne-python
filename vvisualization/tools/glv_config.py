@@ -1,6 +1,6 @@
 # 跨文件全局变量初始化
 from . import glv_man as glvm
-# from VAOne import *
+from VAOne import *
 import VAOneGUI as Vagui
 
 # import importlib
