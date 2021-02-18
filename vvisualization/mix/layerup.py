@@ -9,20 +9,18 @@ sys.path.append('d:/pythonproject')
 from VAOne import *
 
 import vvisualization.tools.glv_man as glvm
+import vvisualization.tools.glv_config as glvc
 
 import vvisualization.read.trimlayer as makenct
 
-importlib.reload(makenct)
+# import importlib
+#
+# importlib.reload(makenct)  # makenct中有全局变量db  因为__pycache__的存在, 如果不重新导入makenct中全局变量db的值还是上次运行的结果
 
 
-# 获取配置好的全局变量
-db = glvm.getv('db')
-glvm.setv('layeredtrim', {})
-
-
-def multi_thickness_trim_create(mat, thicknesses):
+def multi_thickness_trim_create(db, mat, thicknesses):
     # 可以通过自定义thicknesses列表，创建相同材料不同厚度的trimlayer
-    air = makenct.Nct.convert("Fluid", "Air", "Fluid")
+    air = makenct.Nct.convert(db, "Fluid", "Air", "Fluid")
     multi_thickness_trim = []
     if not thicknesses:
         return None
@@ -68,7 +66,7 @@ def layeredtrim_create():
     pass
 
 
-def softhardtrim_create():
+def softhardtrim_create(db):
     sl = glvm.getv('softtrims')  # 字典变量
     hl = glvm.getv('hardtrims')  # 字典变量
     sh = {}
@@ -88,7 +86,7 @@ def softhardtrim_create():
     glvm.getv('layeredtrim')['softhardtrim'] = sh
 
 
-def softevatrim_create():
+def softevatrim_create(db):
     sl = glvm.getv('softtrims')
     se = {}
     for name, trimobj in sl.items():
@@ -108,7 +106,7 @@ def softevatrim_create():
     glvm.getv('layeredtrim')['softevatrim'] = se
 
 
-def solidsoftevatrim_create(thickness=0.0007,
+def solidsoftevatrim_create(db, thickness=0.0007,
                             softlayerthicknesses=None):
     # Steel -> trimlayer
     if softlayerthicknesses is None:
@@ -118,7 +116,7 @@ def solidsoftevatrim_create(thickness=0.0007,
 
     solidsofteva = {}
     sl = glvm.getv('softtrims')
-    air = makenct.Nct.convert("Fluid", "Air", "Fluid")
+    air = makenct.Nct.convert(db, "Fluid", "Air", "Fluid")
     fe = pi_fNeoDatabaseFindByName(db, pi_fIsotropicSolidGetClassID(), 'Steel')
     fe = pi_fConvertDBElementNeoPersist(fe)
     fe = pi_fConvertNeoPersistMaterial(fe)
@@ -127,7 +125,7 @@ def solidsoftevatrim_create(thickness=0.0007,
     eva = pi_fConvertSeptumTrimLayerTrimLayer(eva)
     for name, trimobj in sl.items():
         mat = pi_fTrimLayerGetMaterial(trimobj)
-        multi = multi_thickness_trim_create(mat, softlayerthicknesses)
+        multi = multi_thickness_trim_create(db, mat, softlayerthicknesses)
         multi.append(trimobj)
         softlayerthicknesses.append(round(pi_fTrimLayerGetThickness(trimobj), 2))
         for i in range(len(multi)):
@@ -151,13 +149,13 @@ def solidsoftevatrim_create(thickness=0.0007,
     glvm.getv('layeredtrim')['solidsofteva'] = solidsofteva
 
 
-def soft_create(thickness=0.023):
+def soft_create(db, thickness=0.023):
     """
     创建单轻层  比一般的softlayer要厚
     """
     soft = {}
     sl = glvm.getv('softtrims')  # 如何修改厚度 需要重新创建trim_create函数
-    air = makenct.Nct.convert("Fluid", "Air", "Fluid")
+    air = makenct.Nct.convert(db, "Fluid", "Air", "Fluid")
     for name, trimobj in sl.items():
         layeredname = name
         exist = pi_fNeoDatabaseFindByName(db, pi_fLayeredTrimGetClassID(), layeredname)
@@ -175,12 +173,12 @@ def soft_create(thickness=0.023):
     glvm.getv('layeredtrim')['soft'] = soft
 
 
-def solid_create(thickness=0.0009, mat='Steel'):
+def solid_create(db, thickness=0.0009, mat='Steel'):
     """
     单独的钢板铝板 大厚度
     """
     panel = {}
-    air = makenct.Nct.convert("Fluid", "Air", "Fluid")
+    air = makenct.Nct.convert(db, "Fluid", "Air", "Fluid")
     isotropicsolid = pi_fNeoDatabaseFindByName(db, pi_fIsotropicSolidGetClassID(), mat)
     isotropicsolid = pi_fConvertDBElementNeoPersist(isotropicsolid)
     isotropicsolid = pi_fConvertNeoPersistMaterial(isotropicsolid)
@@ -202,7 +200,7 @@ def solid_create(thickness=0.0009, mat='Steel'):
     """
 
 
-def MNCT_create(layeredtrim_name='solidsofteva', distribution={}):  # distribution 覆盖率字典
+def MNCT_create(db, layeredtrim_name='solidsofteva', distribution={}):  # distribution 覆盖率字典
     """
     use layeredtrim create MNCT
     这部分比较灵活，可以多层叠加，可以通过自定义distribution来修改各部分的覆盖率（不建议）
@@ -224,7 +222,7 @@ def MNCT_create(layeredtrim_name='solidsofteva', distribution={}):  # distributi
                 for layeredtrimobj in layeredtrim.values():
                     temp_layeredtrimobj = pi_fConvertLayeredTrimTrim(layeredtrimobj)
                     # print(temp_layeredtrimobj, ' ', layeredtrimobj)
-                    # pi_fconvert...函数本质上又创造了另外一个对象并将类型设置为目标类型，没有改变原有对象的属性
+                    # pi_fconvert...函数本质上又创造了另外一个指针并将类型设置为目标类型，没有改变原有对象的属性
                     pi_fMultipleTrimAddTrim(mptrim, temp_layeredtrimobj, coverage)
                 steel = glvm.getv('layeredtrim')['solid']['0.9mmSteelPanel']
                 temp_steel = pi_fConvertLayeredTrimTrim(steel)
@@ -244,16 +242,17 @@ if __name__ == '__main__':
     loc1 = r'd:/fiber.xlsx'
     loc2 = r'd:/foam.xlsx'
     try:
-        fibers = makenct.Fiber(loc1)  # 导入fibers数据库对象的集合  使用的是glvc配置的db对象
-        foams = makenct.Foam(loc2)  # 导入foam数据库对象的集合
+        db = pi_fNeoDatabaseGetCurrent()
+        fibers = makenct.Fiber(db, loc1)  # 导入fibers数据库对象的集合  使用的是glvc配置的db对象
+        foams = makenct.Foam(db, loc2)  # 导入foam数据库对象的集合
 
         classify_trim(fibers, foams)  # 材料按软硬层分类 导入全局变量备用
-        softhardtrim_create()
-        softevatrim_create()
-        solidsoftevatrim_create(0.0007)  # 9mm钢板
-        soft_create(0.023)  # 23mm轻层材料
-        solid_create(0.0009)
-        MNCT_create()
+        softhardtrim_create(db)
+        softevatrim_create(db)
+        solidsoftevatrim_create(db, 0.0007)  # 9mm钢板
+        soft_create(db, 0.023)  # 23mm轻层材料
+        solid_create(db, 0.0009)
+        MNCT_create(db)
 
         # 检测全局字典工作是否正常
         temp = glvm.getv('layeredtrim')
