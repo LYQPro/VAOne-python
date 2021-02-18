@@ -10,11 +10,10 @@ from VAOne import *
 
 import vvisualization.tools.glv_man as glvm
 
-import vvisualization.tools.glv_config as glvc
-
-import vvisualization.read.ntc_create_import as makenct
+import vvisualization.read.trimlayer as makenct
 
 importlib.reload(makenct)
+
 
 # 获取配置好的全局变量
 db = glvm.getv('db')
@@ -245,7 +244,7 @@ if __name__ == '__main__':
     loc1 = r'd:/fiber.xlsx'
     loc2 = r'd:/foam.xlsx'
     try:
-        fibers = makenct.Fiber(loc1)  # 导入fibers数据库对象的集合
+        fibers = makenct.Fiber(loc1)  # 导入fibers数据库对象的集合  使用的是glvc配置的db对象
         foams = makenct.Foam(loc2)  # 导入foam数据库对象的集合
 
         classify_trim(fibers, foams)  # 材料按软硬层分类 导入全局变量备用
@@ -257,9 +256,9 @@ if __name__ == '__main__':
         MNCT_create()
 
         # 检测全局字典工作是否正常
-        # temp = glvm.getv('layeredtrim')
-        # for item in temp.items():
-        #     print(item)
+        temp = glvm.getv('layeredtrim')
+        for item in temp.items():
+            print(item)
 
         print('ok')
 

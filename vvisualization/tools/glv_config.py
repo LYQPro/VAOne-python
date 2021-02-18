@@ -21,6 +21,7 @@ try:
     glvm.setv('network', network)
     glvm.setv("env", env)
     glvm.setv('fdom', fdom)
+
     # print(glvm.getv("db"))
     print("""access database done...\nglobal variable configured.....""")
 

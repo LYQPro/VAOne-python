@@ -3,14 +3,14 @@ from VAOne import *
 import pandas as pd
 import sys
 
-sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
+# sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
+
 from vvisualization.tools import glv_man as glvm
 from vvisualization.tools import glv_config as glvc
 import traceback
-# import importlib
+import importlib
 
-# importlib.reload(glvc)
-# importlib.reload(glvm)
+# importlib.reload(glvc)  # 每次调用本脚本都会清空全局字典
 
 
 
