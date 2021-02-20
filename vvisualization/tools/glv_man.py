@@ -1,4 +1,6 @@
 # 跨文件全局变量管理模块
+from typing import Dict, Any
+
 
 def _ini():
     global _dict

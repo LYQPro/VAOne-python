@@ -2,8 +2,9 @@ from abc import abstractmethod
 from VAOne import *
 import pandas as pd
 import sys
-
 # sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
+from vvisualization.tools import glv_config as glvc
+
 
 
 import traceback
@@ -167,8 +168,8 @@ if __name__ == '__main__':
     loc2 = r'd:/foam.xlsx'
     try:
         db = pi_fNeoDatabaseGetCurrent()
-        fibers = Fiber(loc1, db)
-        foams = Foam(loc2, db)
+        fibers = Fiber(db, loc1)
+        foams = Foam(db, loc2)
     except:
         if pi_fIsInit():
             db = pi_fNeoDatabaseGetCurrent()

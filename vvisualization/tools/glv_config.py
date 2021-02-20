@@ -1,10 +1,11 @@
 # 跨文件全局变量初始化
+# 此module必须在最终top-level的脚本中调用一次，且仅能调用一次
 from . import glv_man as glvm
 from VAOne import *
 import VAOneGUI as Vagui
 
-# import importlib
-# importlib.reload(glvm)
+import importlib
+importlib.reload(glvm)
 
 glvm._ini()
 
@@ -17,11 +18,8 @@ try:
     fdom = pi_fAnalysisEnvGetFreqDomain(env)
     Vagui.GUI_DoEvents()
     Vagui.GUI_ClearLog()
-    # glvm.setv("db", db)
-    # glvm.setv('network', network)
-    # glvm.setv("env", env)
-    # glvm.setv('fdom', fdom)
     glvm.setv('layeredtrim', {})
+    glvm.setv('mnct', {})
     # print(glvm.getv("db"))
     print("""access database done...\nglobal variable configured.....""")
 
