@@ -2,28 +2,28 @@ from abc import abstractmethod
 from VAOne import *
 import pandas as pd
 import sys
-
-sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
-from vvisualization.tools import glv_man as glvm
+# sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
 from vvisualization.tools import glv_config as glvc
+
+
+
 import traceback
-# import importlib
-
-# importlib.reload(glvc)
-# importlib.reload(glvm)
 
 
 
-db = glvm.getv("db")  # 获取跨文件全局变量
+
+
+
 
 """声学包抽象类"""
 
 
 class Nct(object):
 
-    def __init__(self, loc):
+    def __init__(self, db, loc):
         self.type = 'Nct'
         self.loc = loc
+        self.db = db
         self.df = self.reading()["SoftLayer1 HardLayer2"]
         self.mat = self.create()
         self.sl = []
@@ -38,8 +38,8 @@ class Nct(object):
         pass
 
     @staticmethod
-    def convert(oldtype, name, newtype):
-        origin = pi_fNeoDatabaseFindByName(db, globals()["pi_f" + oldtype + "GetClassID"](), name)
+    def convert(db, oldtype, name, newtype):
+        origin = pi_fNeoDatabaseFindByName(db , globals()["pi_f" + oldtype + "GetClassID"](), name)
         return globals()["pi_fConvertNeoPersist" + newtype]((pi_fConvertDBElementNeoPersist(origin)))
 
     def trim_create(self, softlayerthickness=0.01, hardlayerthickness=0.003):
@@ -48,9 +48,9 @@ class Nct(object):
         """
         soft_layer = {}
         hard_layer = {}
-        air = Nct.convert("Fluid", "Air", "Fluid")
+        air = Nct.convert(self.db, "Fluid", "Air", "Fluid")
         for i in range(len(self.mat)):
-            temp = Nct.convert(self.type, self.df.index[i], "Material")
+            temp = Nct.convert(self.db, self.type, self.df.index[i], "Material")
             if self.df[i] == 1:
                 layer = pi_fTrimLayerCreate(temp, softlayerthickness, air)  # 用户输入厚度
                 soft_layer[self.df.index[i]] = layer
@@ -62,8 +62,8 @@ class Nct(object):
 
 
 class Fiber(Nct):
-    def __init__(self, loc):
-        super().__init__(loc)
+    def __init__(self, db, loc):
+        super().__init__(db, loc)
         self.type = 'Fiber'
         self.trim_create()
 
@@ -89,25 +89,25 @@ class Fiber(Nct):
         df = self.reading()
         mat = []
         for name in df.index:
-            fiber = pi_fNeoDatabaseFindByName(db, pi_fFiberGetClassID(), name)
+            fiber = pi_fNeoDatabaseFindByName(self.db, pi_fFiberGetClassID(), name)
             if fiber is None:
                 print("start creating material")
-                fiber = pi_fFiberCreate(db, name, float(
+                fiber = pi_fFiberCreate(self.db, name, float(
                     df["Flow Resistivity"][name]), float(df["Density"][name]))
                 pi_fFiberSetPorosity(fiber, float(df["Porosity"][name]))
                 pi_fFiberSetTortuosity(fiber, float(df["Tortuosity"][name]))
                 pi_fFiberSetViscousLength(fiber, float(df["ViscousLength"][name]))
                 pi_fFiberSetThermalLength(fiber, float(df["ThermalLength"][name]))
-                mat.append(fiber)
             else:
+                fiber = Nct.convert(self.db, 'Fiber',name,'Fiber')
                 print("already have {}".format(name))
-
+            mat.append(fiber)
         return mat
 
 
 class Foam(Nct):
-    def __init__(self, loc):
-        super().__init__(loc)
+    def __init__(self, db, loc):
+        super().__init__(db, loc)
         self.type = 'Foam'
         self.trim_create()
 
@@ -134,19 +134,20 @@ class Foam(Nct):
         df = self.reading()
         mat = []
         for name in df.index:
-            foam = pi_fNeoDatabaseFindByName(db, pi_fFoamGetClassID(), name)
+            foam = pi_fNeoDatabaseFindByName(self.db, pi_fFoamGetClassID(), name)
             if foam is None:
                 print("start creating material")
-                foam = pi_fFoamCreate2(db, name, float(df["Density"][name]),
+                foam = pi_fFoamCreate2(self.db, name, float(df["Density"][name]),
                                        float(df["Young's Modulus"][name]),
                                        float(df["Young's Modulus"][name]) / (2 * (1 + df["Poisson's Ratio"][name])),
                                        float(df["Poisson's Ratio"][name]), float(df["DLF"][name]),
                                        float(df["Porosity"][name]), float(df["Tortuosity"][name]),
                                        float(df["Flow Resistivity"][name]), float(df["ViscousLength"][name]),
                                        float(df["ThermalLength"][name]))
-                mat.append(foam)
             else:
+                foam = Nct.convert(self.db, 'Foam', name, 'Foam')
                 print("already have {}".format(name))
+            mat.append(foam)
         return mat
 
 
@@ -166,8 +167,9 @@ if __name__ == '__main__':
     loc1 = r'd:/fiber.xlsx'
     loc2 = r'd:/foam.xlsx'
     try:
-        fibers = Fiber(loc1)
-        foams = Foam(loc2)
+        db = pi_fNeoDatabaseGetCurrent()
+        fibers = Fiber(db, loc1)
+        foams = Foam(db, loc2)
     except:
         if pi_fIsInit():
             db = pi_fNeoDatabaseGetCurrent()

@@ -1,4 +1,4 @@
-# 第一个脚本
+## 第一个脚本
 基本作用:从excel中导入纤维材料的BIOT模型，两两组合建立“软层+硬层”的声学包，求解模型获得最优解
 
 重点:
@@ -10,39 +10,110 @@
 + `pi_f...Unref函数`使用场景不清晰
 + 创建函数实现最大程度代码复用
 
-# 第二个脚本
+## 第二个脚本
 
 
 
-# 优化函数探索
-+ optimizationcreate创建在对象在数据库中
+## 优化函数探索
++ optimizationCreate创建在对象在数据库中
 + pi_fOptimizationRun (COptimization *opt, void *ebInstance, CProgressThreadStruct *pThreadProgress) -> int
  
 + pi_fOptimizationSetScript (COptimization *opt, const char *script)  -> void 
 + pi_fOptimizationAddFunction (COptimization *opt, const char *name, const char *expression) ->COptimizationFunction
   const char *  pi_fOptimizationFunctionGetExpression (COptimizationFunction *function) 
 + objectiveFunctionSecond 
-+ NCT的absoption 和 声腔的absorption不同
++ NCT的absorption 和 声腔的absorption不同
 + optimization一旦被修改之后，后面对任何的optimization对象进行更改都不会改变优化脚本
 + 一个database中，只能存在一个optimization对象
 + pi_fOptimization optimization回归到没有编辑的状态 脚本是，GUI也是
-+ pi_fOptimizationgParameterIsDataComplete 用来写线程进度函数
++ pi_fOptimizationParameterIsDataComplete 用来写线程进度函数
 + pi_fOptimizationParameterOptimizationReset
-+ 用python脚本更改优化对象，会在optimizationscript中引起相应的变化
-+ ebinstance = GUI_GetCurrentScriptingInstance() 唯一的到 ebinstance的方法
-+ iternal function for parameters and outputvariable
++ 用python脚本更改优化对象，会在optimizationScript中引起相应的变化
++ ebInstance = GUI_GetCurrentScriptingInstance() 唯一的到 ebInstance的方法
++ internal function for parameters and outputVariable
 + 增加optimization函数后需要进行参数更新
 
-# Tips
+## Tips
 
 
 
-# pyt
+## pyqt
 ui文件 用 QFile加载
 layout 窗口缩放 空间间距也跟着缩放 layout 可以嵌套
-sizepolicy  控件缩放策略  fixed 固定的
+sizePolicy  控件缩放策略  fixed 固定的
 
 先摆放控件->container->layout
-调整layout内部控件比例 使用layoutstretch  调整间距 space
+调整layout内部控件比例 使用layoutStretch  调整间距 space
 
-pyinstaller 完成程序打包  程序运行中动态使用的外部文件需要复制到可执行文件得同一个目录下面 例如ui文件
+pyInstaller 完成程序打包  程序运行中动态使用的外部文件需要复制到可执行文件得同一个目录下面 例如ui文件
+
+
+
+##全局变量管理
+__pycache__ 由于import module生成
+__pycache__ 里面的*.pyc、 *.pyo 会在首次import module   (这里的首次是指对于python解释器启动后的首次)
+                                或者 module源代码发生改变时重新生成   (importlib.reload(module)) 
+                                
+glv_config 一定只能在最终的脚本里启动一次   
+由于pycache的存在VAOne启动后 主脚本中的 import glv_config 将会使用pycache中的内容 所以主脚本不能检测到跨文件（VAOne）数据库的变化
+而如果每次都reload(glv_config)的话 每次都会触发 glv_config 中的 glvm_ini() 将全局变量全部清空  这将导致本文件的上次导入信息丢失
+
+
+为了检测文件的变化 必须使用 pi_fNeoDatabaseGetcurrent
+
+
+
+##VAOne环境的天坑
++ **管理员模式**安装packages。仍然失败，更改python36文件的权限
++   不要随便安装pyqt5_tools会改变VAOne的固有动态链接库，后续会出现问题
++ 添加系统变量:
+````
+变量名:             QT_QPA_PLATFORM_PLUGIN_PATH
+路径:   C:\Program Files\ESI Group\VAOne2019\Python36\Lib\site-packages\PyQt5\Qt\plugins\platforms
+````
++ 安装pyqt5_plugins:
+        导致PyQt5版本改变 重新安装**PyQt5==5.11.2**  **必须是这个版本**
+
++ VAOne中运行PyQt5程序需要添加:     <font color=red>QApplication实例只能存在一个</font>
+                        
+                        if QApplication.instance() is None:
+                            app = QApplication(sys.argv)
+                            standalone = True
+                        else:
+                            standalone=False
++ iterator的究极神坑 
+>It is important to note that objects cannot be deleted from the database while an iterator exists.
+>Modifying the database structure while iterating through it will cause unpredictable results
+- [x]  **不要轻易使用赋值语句**
+- [x]  **绝大多数的赋值语句产生的左值将会自动添加到数据库中，改变了数据库的结构。 如果这个时候有任何<CIterator\*>存在将会发生不可预测的错误**
+
+
+
+##模块化
++ 尽可能不要在子模块中使用全局变量
++ 函数功能尽可能解耦，同时保持传入参数不能过多
+
+
+
+
+##todo
++ 子模块编写完成把绝对引用改成相对引用？
++ 消除sys.path.append
+
+
+##语音助手
+````python
+    import win32com.client
+    # 直接调用操作系统的语音接口
+    speaker = win32com.client.Dispatch("SAPI.SpVoice")
+    # 输入你想要说的话，前提是操作系统语音助手要认识。一般中文和英文是没有问题的
+    speaker.Speak("他能秒我，他能秒杀我？他要是能把我秒了，我当场······")
+````
+
+##C/C++ Python混合编程 通过dll库和ctypes
+gcc -o example.dll -shared example.c
+加载lib = ctypes.CDLL(‘dll所在路径’)
+getattr(dll,“func”,) is not None
+lib.func
+
+        
