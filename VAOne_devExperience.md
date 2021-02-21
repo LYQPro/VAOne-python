@@ -93,7 +93,7 @@ glv_config 一定只能在最终的脚本里启动一次
 + 尽可能不要在子模块中使用全局变量
 + 函数功能尽可能解耦，同时保持传入参数不能过多
 
-
+##字符串模式匹配
 
 
 ##todo
@@ -116,4 +116,4 @@ gcc -o example.dll -shared example.c
 getattr(dll,“func”,) is not None
 lib.func
 
-        
+

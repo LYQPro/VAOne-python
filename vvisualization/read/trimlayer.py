@@ -4,11 +4,8 @@ import pandas as pd
 import sys
 # sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
 from vvisualization.tools import glv_config as glvc
-
-
-
+from typing import List, Any , Tuple , Dict
 import traceback
-
 
 
 
@@ -21,16 +18,18 @@ import traceback
 class Nct(object):
 
     def __init__(self, db, loc):
+        # 基本信息
         self.type = 'Nct'
         self.loc = loc
         self.db = db
-        self.df = self.reading()["SoftLayer1 HardLayer2"]
+        # 材料信息
+        self.df = self.read()  # 记录软硬层分类信息
         self.mat = self.create()
-        self.sl = []
-        self.hl = []
+        # trimlayer厚度信息
+        self.thickness = [None, None]  # [softTrimlayer厚度, 硬层hardTrimlayer厚度]
 
     @abstractmethod
-    def reading(self):
+    def read(self):
         pass
 
     @abstractmethod
@@ -42,7 +41,7 @@ class Nct(object):
         origin = pi_fNeoDatabaseFindByName(db , globals()["pi_f" + oldtype + "GetClassID"](), name)
         return globals()["pi_fConvertNeoPersist" + newtype]((pi_fConvertDBElementNeoPersist(origin)))
 
-    def trim_create(self, softlayerthickness=0.01, hardlayerthickness=0.003):
+    def trimLayerCreate(self, softlayerthickness=0.01, hardlayerthickness=0.003) -> Tuple[Dict, Dict]:  # 用户输入
         """
         use material create trimlayer
         """
@@ -52,22 +51,22 @@ class Nct(object):
         for i in range(len(self.mat)):
             temp = Nct.convert(self.db, self.type, self.df.index[i], "Material")
             if self.df[i] == 1:
-                layer = pi_fTrimLayerCreate(temp, softlayerthickness, air)  # 用户输入厚度
+                layer = pi_fTrimLayerCreate(temp, softlayerthickness, air)
+                self.thickness[0] = softlayerthickness
                 soft_layer[self.df.index[i]] = layer
             if self.df[i] == 2:
-                layer = pi_fTrimLayerCreate(temp, hardlayerthickness, air)  # 用户输入厚度
+                layer = pi_fTrimLayerCreate(temp, hardlayerthickness, air)
+                self.thickness[1] = hardlayerthickness
                 hard_layer[self.df.index[i]] = layer
-        self.sl = soft_layer
-        self.hl = hard_layer
+        return (soft_layer, hard_layer)
 
 
 class Fiber(Nct):
     def __init__(self, db, loc):
         super().__init__(db, loc)
         self.type = 'Fiber'
-        self.trim_create()
 
-    def reading(self):
+    def read(self) -> pd.DataFrame:
         """
         读入Fiber excel文件
         """
@@ -80,13 +79,13 @@ class Fiber(Nct):
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
         print(df)
         print("import Excel done...")
-        return df
+        return df["SoftLayer1 HardLayer2"]
 
-    def create(self):
+    def create(self) -> List[Any]:
         """
-        create fiber
+        create fiber material
         """
-        df = self.reading()
+        df = self.read()
         mat = []
         for name in df.index:
             fiber = pi_fNeoDatabaseFindByName(self.db, pi_fFiberGetClassID(), name)
@@ -109,9 +108,8 @@ class Foam(Nct):
     def __init__(self, db, loc):
         super().__init__(db, loc)
         self.type = 'Foam'
-        self.trim_create()
 
-    def reading(self):
+    def read(self) -> pd.DataFrame:
         """ 
         读入Foam excel文件
         """
@@ -125,13 +123,13 @@ class Foam(Nct):
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
         print(df)
         print("import Excel done...")
-        return df
+        return df["SoftLayer1 HardLayer2"]
 
-    def create(self):
+    def create(self) -> List[Any]:
         """
-        create foam
+        create foam material
         """
-        df = self.reading()
+        df = self.read()
         mat = []
         for name in df.index:
             foam = pi_fNeoDatabaseFindByName(self.db, pi_fFoamGetClassID(), name)
@@ -156,7 +154,7 @@ class isotropicsolid(Nct):
     def __init__(self, loc):
         super().__init__(loc)
 
-    def reading(self):
+    def read(self):
         pass
 
     def create(self):
@@ -169,7 +167,9 @@ if __name__ == '__main__':
     try:
         db = pi_fNeoDatabaseGetCurrent()
         fibers = Fiber(db, loc1)
+        # print(fibers.trimLayerCreate(0.02))
         foams = Foam(db, loc2)
+        foams.trimLayerCreate(0.015, 0.002)
     except:
         if pi_fIsInit():
             db = pi_fNeoDatabaseGetCurrent()

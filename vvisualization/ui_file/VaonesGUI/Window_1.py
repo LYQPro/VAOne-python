@@ -10,7 +10,6 @@ df = pd.DataFrame({'a': ['Mary', 'Jim', 'John'],
                    'b': [100, 200, 300],
                    'c': ['a', 'b', 'c']})
 
-
 class Mainwindow(QMainWindow):
     def __init__(self):
         super(Mainwindow, self).__init__()
