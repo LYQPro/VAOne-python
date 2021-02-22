@@ -2,7 +2,7 @@ import sys
 
 from typing import List, Optional, Tuple, Dict
 
-sys.path.append('d:/pythonproject')
+# sys.path.append('d:/pythonproject')
 
 from VAOne import *
 
@@ -44,10 +44,8 @@ def trimLayerClassify(*trims: Tuple[Dict, Dict]) -> None:
     sl = {}
     hl = {}
     for i in range(len(trims)):
-        if trims[i][0]:
-            sl.update(trims[i][0])
-        if trims[i][0]:
-            hl.update(trims[i][1])
+        sl.update(trims[i][0])
+        hl.update(trims[i][1])
 
     glvm.setv('softtrims', sl)  # 设置跨文件全局变量
     glvm.setv('hardtrims', hl)  # 设置跨文件全局变量
@@ -223,12 +221,15 @@ def MultipleNoiseControlTreatment(name, layerupdict, distribution: Optional[Dict
     """
     NUM_LAYUP = 5
     db = pi_fNeoDatabaseGetCurrent()
+    if pi_fNeoDatabaseFindByName(db, pi_fMultipleTrimGetClassID(), name):
+        print(f'already have {name}')
+        return makenct.Nct.convert(db, 'MultipleTrim', name, 'MultipleTrim')
     layerups = layerupdict
     mptrim = pi_fMultipleTrimCreate(db, name)
     if distribution is None:
-        # todo 一类layeredtrim中(<=5)个layup进行组合
+        # 一类layeredtrim中最后(<=5)个layup进行组合
         temp = list(layerups.values())
-        for elem in temp[:NUM_LAYUP]:
+        for elem in temp[-NUM_LAYUP:]:
             pi_fMultipleTrimAddTrim(mptrim, pi_fConvertLayeredTrimTrim(elem), 0.8/NUM_LAYUP)
     else:
         # 按照distribution中的layerup和coverage创建mnct
@@ -241,6 +242,7 @@ def MultipleNoiseControlTreatment(name, layerupdict, distribution: Optional[Dict
     panel = solidLayerUp(0.0009)
     pi_fMultipleTrimAddTrim(mptrim, pi_fConvertLayeredTrimTrim(panel['0.9mmSteelPanel']), 0.2)
     glvm.getv('mnct').update({name: mptrim})
+    return {name: mptrim}
 
 
 if __name__ == '__main__':
@@ -248,7 +250,7 @@ if __name__ == '__main__':
     loc2 = r'd:/foam.xlsx'
     try:
         db1 = pi_fNeoDatabaseGetCurrent()
-        fibers = makenct.Fiber(db1, loc1)  # 导入fibers数据库对象的集合  使用的是glvc配置的db对象
+        fibers = makenct.Fiber(db1, loc1)  # 导入fibers数据库对象的集合
         fiberTrimLayers = fibers.trimLayerCreate(0.02)
         foams = makenct.Foam(db1, loc2)  # 导入foam数据库对象的集合
         foamTrimLayers = foams.trimLayerCreate(0.035, 0.002)

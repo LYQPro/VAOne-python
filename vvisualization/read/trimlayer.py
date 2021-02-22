@@ -2,7 +2,7 @@ from abc import abstractmethod
 from VAOne import *
 import pandas as pd
 import sys
-# sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
+sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
 from vvisualization.tools import glv_config as glvc
 from typing import List, Any , Tuple , Dict
 import traceback
@@ -23,7 +23,7 @@ class Nct(object):
         self.loc = loc
         self.db = db
         # 材料信息
-        self.df = self.read()  # 记录软硬层分类信息
+        self.df = self.read()["SoftLayer1 HardLayer2"]  # 记录软硬层分类信息
         self.mat = self.create()
         # trimlayer厚度信息
         self.thickness = [None, None]  # [softTrimlayer厚度, 硬层hardTrimlayer厚度]
@@ -79,7 +79,7 @@ class Fiber(Nct):
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
         print(df)
         print("import Excel done...")
-        return df["SoftLayer1 HardLayer2"]
+        return df
 
     def create(self) -> List[Any]:
         """
@@ -123,7 +123,7 @@ class Foam(Nct):
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
         print(df)
         print("import Excel done...")
-        return df["SoftLayer1 HardLayer2"]
+        return df
 
     def create(self) -> List[Any]:
         """

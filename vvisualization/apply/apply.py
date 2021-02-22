@@ -11,6 +11,10 @@ from typing import List, Any, Tuple
 from VAOne import *
 import VAOneGUI as vagui
 import sys
+sys.path.append('d:/pythonproject')
+from vvisualization.read.trimlayer import Fiber, Foam
+from vvisualization.mix.layerup import solidSoftEvaLayerUp, trimLayerClassify
+
 
 # todo
 sys.path.append('d:/pythonproject')
@@ -20,7 +24,7 @@ from vvisualization.tools import glv_man as glvm
 def GetSelectedPlate():
     """
     返回3D窗口中选中的Plate
-    返回形式(plateName, plate_obj)
+    返回形式list((plateName, plate_obj))
     """
     selected_plate_num = vagui.GUI_GetSelectionCount()
     if selected_plate_num < 1:
@@ -51,26 +55,94 @@ def GetSelectedPlate():
                 plate = pi_fConvertNeoPersistPlate(plate)
                 plate_name = pi_fPlateGetCName(plate)
                 selectedplatelist.append((plate_name, plate))
-
         return selectedplatelist
 
 
-def TrimPlate(plates: List[Tuple[Any, Any]], trim):
+def trimPlate(plates, reverse):  # generator
     """
     平板上加装声学包
     平板：传入的参数
-    声学包：layer-ups 或 mnct
+    声学包：layerups or mnct 在glvm中
+    @param plates: list(tuple(any, any))
+    @param reverse: 0正(A)面 1背(B)面
     """
-    #   获取跨文件全局变量layeredtrim
-    layup = glvm.getv('layeredtrim')
-    mptrim = glvm.getv('mnct')
-    pass
+    trim = 'init'
+    while True:
+        trim = yield trim
+        if trim is None:
+            break
 
+        try:
+            temp_trim = pi_fConvertLayeredTrimTrim(trim)
+        except TypeError:
+            temp_trim = pi_fConvertMultipleTrimTrim(trim)
+        except:
+            raise
+
+        for plate in plates:
+            if reverse:
+                pi_fPlateSetTrimB(plate[1], temp_trim)
+            else:
+                pi_fPlateSetTrimA(plate[1], temp_trim)
+
+        # todo 求解函数
+        return trim
+
+
+def trimPlateProxy(platelist, reverse):
+    while True:
+        trim = yield from trimPlate(platelist, reverse)
+        if trim is None:
+            continue
+        try:
+            trimname = pi_fLayeredTrimGetCName(trim)
+        except TypeError:
+            trimname = pi_fMultipleTrimGetCName(trim)
+        except:
+            raise
+        print(f'have applied {trimname} to selected plates')
+
+
+def trimPlateCaller(trims, reverse):
+    """
+    @param reverse: int {0,1}
+    @type trims: dict
+    """
+    trims = list(trims.values())
+    # 实例化生成器
+    if GetSelectedPlate():
+        generator = trimPlateProxy(GetSelectedPlate(), reverse)
+        # 初始化生成器
+        next(generator)
+        generator.send(trims[1])
+        # todo
+        # 在这中间可以在3D窗口中重新选择plate
+        #
+        generator.send(trims[0])
+        # 结束生成器
+        generator.send(None)
+        return True
+    else:
+        print('select at least one plate')
+        return False
 
 
 if __name__ == '__main__':
+    loc1 = r'd:/fiber.xlsx'
+    loc2 = r'd:/foam.xlsx'
     try:
-        temp = GetSelectedPlate()
-        print(temp)
+        db = pi_fNeoDatabaseGetCurrent()
+        # temp = GetSelectedPlate()
+        # print(temp)
+        fibers = Fiber(db, loc1)
+        foams = Foam(db, loc2)
+        trimLayerClassify(fibers.trimLayerCreate(), foams.trimLayerCreate())
+        solidSoftEvaLayerUp(0.007, [0.01, 0.02])
+        layerups = glvm.getv('layeredtrim')
+        if trimPlateCaller(layerups, 0):
+            print('ok')
+        else:
+            print('not ok')
+
     except:
         raise
