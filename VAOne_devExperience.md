@@ -37,23 +37,13 @@
 
 
 
-## pyqt
-ui文件 用 QFile加载
-layout 窗口缩放 空间间距也跟着缩放 layout 可以嵌套
-sizePolicy  控件缩放策略  fixed 固定的
-
-先摆放控件->container->layout
-调整layout内部控件比例 使用layoutStretch  调整间距 space
-
-pyInstaller 完成程序打包  程序运行中动态使用的外部文件需要复制到可执行文件得同一个目录下面 例如ui文件
-
 
 
 ##全局变量管理
 __pycache__ 由于import module生成
 __pycache__ 里面的*.pyc、 *.pyo 会在首次import module   (这里的首次是指对于python解释器启动后的首次)
-                                或者 module源代码发生改变时重新生成   (importlib.reload(module)) 
-                                
+或者 module源代码发生改变时重新生成   (importlib.reload(module)) 
+
 glv_config 一定只能在最终的脚本里启动一次   
 由于pycache的存在VAOne启动后 主脚本中的 import glv_config 将会使用pycache中的内容 所以主脚本不能检测到跨文件（VAOne）数据库的变化
 而如果每次都reload(glv_config)的话 每次都会触发 glv_config 中的 glvm_ini() 将全局变量全部清空  这将导致本文件的上次导入信息丢失
@@ -72,21 +62,25 @@ glv_config 一定只能在最终的脚本里启动一次
 路径:   C:\Program Files\ESI Group\VAOne2019\Python36\Lib\site-packages\PyQt5\Qt\plugins\platforms
 ````
 + 安装pyqt5_plugins:
-        导致PyQt5版本改变 重新安装**PyQt5==5.11.2**  **必须是这个版本**
+导致PyQt5版本改变 重新安装**PyQt5==5.11.2**  **必须是这个版本**
 
 + VAOne中运行PyQt5程序需要添加:     <font color=red>QApplication实例只能存在一个</font>
-                        
-                        if QApplication.instance() is None:
-                            app = QApplication(sys.argv)
-                            standalone = True
-                        else:
-                            standalone=False
+
+if QApplication.instance() is None:
+app = QApplication(sys.argv)
+standalone = True
+else:
+standalone=False
 + iterator的究极神坑 
 >It is important to note that objects cannot be deleted from the database while an iterator exists.
 >Modifying the database structure while iterating through it will cause unpredictable results
 - [x]  **不要轻易使用赋值语句**
 - [x]  **绝大多数的赋值语句产生的左值将会自动添加到数据库中，改变了数据库的结构。 如果这个时候有任何<CIterator\*>存在将会发生不可预测的错误**
 
++ 永远不要向api函数传入None参数，这会引发不可恢复的错误。传入其他错误参数则会有类型报错。因此<font color=grean>出现unrecoverable mistake首先考虑是否传入了None</font>
+
++ 在VAOne内部运行python脚本， sys.stdout自动被定向到python console, sys.stdin = None 
+如果要得到用户输入只能通过QT界面获得用户输入
 
 
 ##模块化
@@ -103,17 +97,34 @@ glv_config 一定只能在最终的脚本里启动一次
 
 ##语音助手
 ````python
-    import win32com.client
-    # 直接调用操作系统的语音接口
-    speaker = win32com.client.Dispatch("SAPI.SpVoice")
-    # 输入你想要说的话，前提是操作系统语音助手要认识。一般中文和英文是没有问题的
-    speaker.Speak("他能秒我，他能秒杀我？他要是能把我秒了，我当场······")
+import win32com.client
+# 直接调用操作系统的语音接口
+speaker = win32com.client.Dispatch("SAPI.SpVoice")
+# 输入你想要说的话，前提是操作系统语音助手要认识。一般中文和英文是没有问题的
+speaker.Speak("他能秒我，他能秒杀我？他要是能把我秒了，我当场······")
 ````
 
 ##C/C++ Python混合编程 通过dll库和ctypes
+```shell
 gcc -o example.dll -shared example.c
-加载lib = ctypes.CDLL(‘dll所在路径’)
+lib = ctypes.CDLL(‘dll所在路径’)
 getattr(dll,“func”,) is not None
 lib.func
+```
+
+## pyqt多进程、界面数据同步
++ 线程、进程
++ 进程间通信
++ pyqtSignal、pyqtSlot
+
+## pyqt
+ui文件 用 QFile加载
+layout 窗口缩放 空间间距也跟着缩放 layout 可以嵌套
+sizePolicy  控件缩放策略  fixed 固定的
+
+先摆放控件->container->layout
+调整layout内部控件比例 使用layoutStretch  调整间距 space
+QProgressbar
 
 
+pyInstaller 完成程序打包  程序运行中动态使用的外部文件需要复制到可执行文件得同一个目录下面 例如ui文件

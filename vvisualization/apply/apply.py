@@ -11,14 +11,47 @@ from typing import List, Any, Tuple
 from VAOne import *
 import VAOneGUI as vagui
 import sys
+
 sys.path.append('d:/pythonproject')
 from vvisualization.read.trimlayer import Fiber, Foam
 from vvisualization.mix.layerup import solidSoftEvaLayerUp, trimLayerClassify
-
+import win32com.client
+import time
 
 # todo
 sys.path.append('d:/pythonproject')
 from vvisualization.tools import glv_man as glvm
+from PyQt5.QtWidgets import QApplication, QDialog
+from PyQt5 import QtWidgets
+
+ESCAPE_NUM = 666
+
+
+class askTrimIndex(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.ipt = QtWidgets.QLineEdit()
+        self.btn = QtWidgets.QPushButton('确定', self)
+        self.setupUi()
+        self.btn.clicked.connect(self.on_btn_clicked)
+
+    def setupUi(self):
+        vbl = QtWidgets.QVBoxLayout(self)
+        vbl.addWidget(self.ipt)
+        vbl.addWidget(self.btn)
+
+    def getVal(self):
+        return self.ipt.text()
+
+    def accept(self) -> None:
+        pass
+
+    def on_btn_clicked(self):
+        if GetSelectedPlate() or (self.getVal() == str(ESCAPE_NUM)):
+            time.sleep(0.1)
+            self.close()
+        else:
+            QtWidgets.QMessageBox.information(self, '消息', '先选择下一批plate！！')
 
 
 def GetSelectedPlate():
@@ -86,7 +119,7 @@ def trimPlate(plates, reverse):  # generator
                 pi_fPlateSetTrimA(plate[1], temp_trim)
 
         # todo 求解函数
-        return trim
+    return trim
 
 
 def trimPlateProxy(platelist, reverse):
@@ -95,7 +128,7 @@ def trimPlateProxy(platelist, reverse):
         if trim is None:
             continue
         try:
-            trimname = pi_fLayeredTrimGetCName(trim)
+            trimname = pi_fLayeredTrimGetCName(trim)  # 传入None将会引发不可恢复的错误,传入其他错误参数将会引发TypeError
         except TypeError:
             trimname = pi_fMultipleTrimGetCName(trim)
         except:
@@ -103,37 +136,85 @@ def trimPlateProxy(platelist, reverse):
         print(f'have applied {trimname} to selected plates')
 
 
-def trimPlateCaller(trims, reverse):
+def trimPlateCaller(trims, reverse) -> bool:
     """
-    @param reverse: int {0,1}
     @type trims: dict
+    @param reverse: int {0,1}
     """
+    names = list(trims.keys())
     trims = list(trims.values())
-    # 实例化生成器
-    if GetSelectedPlate():
-        generator = trimPlateProxy(GetSelectedPlate(), reverse)
-        # 初始化生成器
-        next(generator)
-        generator.send(trims[1])
-        # todo
-        # 在这中间可以在3D窗口中重新选择plate
-        #
-        generator.send(trims[0])
-        # 结束生成器
-        generator.send(None)
-        return True
-    else:
-        print('select at least one plate')
+    if not trims:
         return False
+    speaker = win32com.client.Dispatch("SAPI.SpVoice")  # 系统语音
+    speaker.Speak(f'请先在3D界面选择平板,然后在对话框输入一个整数，这个整数代表了你选择的声学包, 输入{ESCAPE_NUM}退出')
+
+    generator = None
+
+    # 用户输入准备工作
+    print(f'\n\n\n\ninput a int [1..{len(trims)}] to specify a trim that you want to apply\n'
+          'the int is the index of the specified trim in trims you pass in\n'
+          f'enter {ESCAPE_NUM} to escape\n\n')
+
+    for i in range(len(names)):
+        print(f'{i + 1} : {names[i]}')
+
+    while True:  # 用户apply声学包循环, 输入ESCAPE_NUM退出
+
+        num = ESCAPE_NUM
+        while True:
+            try:
+                # 用户输入/ 获取输入
+                myDialog = askTrimIndex()
+                myDialog.exec_()
+                num = myDialog.getVal()
+
+                num = int(num)
+                if (len(trims) >= num > 0) or (num == ESCAPE_NUM):
+                    break
+                else:
+                    print(f'int out of range, expect int ranging from 1 to {len(trims)}')
+            except ValueError:
+                print('please input a integer')
+                continue
+            except:
+                raise
+
+        # 输入ESCAPE_NUM退出循环
+        if num == ESCAPE_NUM:
+            break
+
+        # 获取选中的平板信息
+        generator = trimPlateProxy(GetSelectedPlate(), reverse)
+        next(generator)
+        # 装饰平板
+        generator.send(trims[num - 1])
+        print(f'have applied {names[num - 1]} to selected plates')
+
+    # 结束生成器
+    # generator.send(None)
+
+    return True
+
+
+def randomTrimPlateCaller():
+    # 按照以下格式写都可以
+
+    # 确定有平板选中
+    # generator = trimPlateProxy(GetSelectedPlate(), 1)
+    # next(generator)
+    # 任意个generator.send()
+    # generator.send(None) 终止
+    pass
 
 
 if __name__ == '__main__':
     loc1 = r'd:/fiber.xlsx'
     loc2 = r'd:/foam.xlsx'
     try:
+
         db = pi_fNeoDatabaseGetCurrent()
-        # temp = GetSelectedPlate()
-        # print(temp)
+        temp = GetSelectedPlate()
+        print(temp)
         fibers = Fiber(db, loc1)
         foams = Foam(db, loc2)
         trimLayerClassify(fibers.trimLayerCreate(), foams.trimLayerCreate())
