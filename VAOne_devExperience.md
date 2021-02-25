@@ -113,9 +113,39 @@ lib.func
 ```
 
 ## pyqt多进程、界面数据同步
++ <font color = pink>无法通过对象成员变量进行成员函数的通讯</font> 
++ 类成员变量能够随意在类的对象成员之间任意传递(目前看起来是这样)
 + 线程、进程
 + 进程间通信
 + pyqtSignal、pyqtSlot
++ 不同子窗口之间的通信
+  + 自定义信号
+  + 自定义槽函数
+  + 链接信号与槽
+  + 自定义发送信号函数
+
+```python
+from PyQt5.QtCore import pyqtSignal, QObject
+import pandas as pd
+class A(QObject):
+    my = pyqtSignal(object)
+    def __init__(self):
+        super().__init__()
+        self.my.connect(self.recv)
+    def recv(self, df):
+        print(df)
+    def send(self):
+      df = pd.read_excel(r'd:/fiber.xlsx', header=None,sheet_name="Sheet1")
+      self.my.emit(df)
+        
+ if __name__ == '__main__':         
+    a = A()
+    a.send()
+  ```
+> 
+
+
+
 
 ## pyqt
 ui文件 用 QFile加载
@@ -128,3 +158,7 @@ QProgressbar
 
 
 pyInstaller 完成程序打包  程序运行中动态使用的外部文件需要复制到可执行文件得同一个目录下面 例如ui文件
+
+
+# todo
++ navigate目前只能看fiber材料, 需要再增加一个按钮

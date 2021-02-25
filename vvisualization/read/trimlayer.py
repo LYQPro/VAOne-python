@@ -2,8 +2,7 @@ from abc import abstractmethod
 from VAOne import *
 import pandas as pd
 import sys
-sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
-from vvisualization.tools import glv_config as glvc
+# sys.path.append(r'd:/pythonproject') # 如果直接以脚本运行此文件(top-level)需要将根包所在位置加入sys.path
 from typing import List, Any , Tuple , Dict
 import traceback
 

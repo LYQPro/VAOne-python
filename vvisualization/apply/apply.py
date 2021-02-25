@@ -21,13 +21,13 @@ import time
 # todo
 sys.path.append('d:/pythonproject')
 from vvisualization.tools import glv_man as glvm
-from PyQt5.QtWidgets import QApplication, QDialog
+from PyQt5.QtWidgets import QDialog
 from PyQt5 import QtWidgets
 
 ESCAPE_NUM = 666
 
 
-class askTrimIndex(QDialog):
+class AskTrimIndex(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ipt = QtWidgets.QLineEdit()
@@ -126,7 +126,7 @@ def trimPlateProxy(platelist, reverse):
     while True:
         trim = yield from trimPlate(platelist, reverse)
         if trim is None:
-            continue
+            break
         try:
             trimname = pi_fLayeredTrimGetCName(trim)  # 传入None将会引发不可恢复的错误,传入其他错误参数将会引发TypeError
         except TypeError:
@@ -164,7 +164,7 @@ def trimPlateCaller(trims, reverse) -> bool:
         while True:
             try:
                 # 用户输入/ 获取输入
-                myDialog = askTrimIndex()
+                myDialog = AskTrimIndex()
                 myDialog.exec_()
                 num = myDialog.getVal()
 

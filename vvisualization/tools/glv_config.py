@@ -20,6 +20,8 @@ try:
     Vagui.GUI_ClearLog()
     glvm.setv('layeredtrim', {})
     glvm.setv('mnct', {})
+    glvm.setv('softtrims', {})
+    glvm.setv('hardtrims', {})
     # print(glvm.getv("db"))
     print("""access database done...\nglobal variable configured.....""")
 

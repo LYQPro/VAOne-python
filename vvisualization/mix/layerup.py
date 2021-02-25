@@ -47,8 +47,8 @@ def trimLayerClassify(*trims: Tuple[Dict, Dict]) -> None:
         sl.update(trims[i][0])
         hl.update(trims[i][1])
 
-    glvm.setv('softtrims', sl)  # 设置跨文件全局变量
-    glvm.setv('hardtrims', hl)  # 设置跨文件全局变量
+    glvm.getv('softtrims').update(sl)  # 设置跨文件全局变量
+    glvm.getv('hardtrims').update(hl)  # 设置跨文件全局变量
 
 
 def layerUp():
@@ -227,7 +227,7 @@ def MultipleNoiseControlTreatment(name, layerupdict, distribution: Optional[Dict
     layerups = layerupdict
     mptrim = pi_fMultipleTrimCreate(db, name)
     if distribution is None:
-        # 一类layeredtrim中最后(<=5)个layup进行组合
+        # 一类layeredtrim中最后NUM_LAYUP个layup进行组合
         temp = list(layerups.values())
         for elem in temp[-NUM_LAYUP:]:
             pi_fMultipleTrimAddTrim(mptrim, pi_fConvertLayeredTrimTrim(elem), 0.8/NUM_LAYUP)

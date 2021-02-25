@@ -212,8 +212,8 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.TLayUpsApply_pushButton.clicked.connect(self.open_TLayUps)
-        self.MultipleNCTApply_pushButton.clicked.connect(self.open_Multiple)
+        # self.TLayUpsApply_pushButton.clicked.connect(self.open_TLayUps)
+        # self.MultipleNCTApply_pushButton.clicked.connect(self.open_Multiple)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -228,32 +228,38 @@ class Ui_MainWindow(object):
         self.MNCTcomboBox.setItemText(1, _translate("MainWindow", "soft-layer and Eva"))
         self.MNCTcomboBox.setItemText(2, _translate("MainWindow", "steel and soft-layer and Eva"))
         self.MNCTcomboBox.setItemText(3, _translate("MainWindow", "thick soft-layer"))
-        self.MNCTcomboBox.setItemText(4, _translate("MainWindow", "thick steel"))
-        self.MultipleNCTApply_pushButton.setText(_translate("MainWindow", "Apply"))
+        self.MNCTcomboBox.setItemText(4, _translate("MainWindow", "thick isotropic solid"))
+        self.MultipleNCTApply_pushButton.setText(_translate("MainWindow", "Make"))
         self.TLayUpsgroupBox.setTitle(_translate("MainWindow", "Treatment lay-ups"))
         self.Combination_label.setText(_translate("MainWindow", "combined strategy"))
         self.Combination_comboBox.setItemText(0, _translate("MainWindow", "soft and hard-layer"))
         self.Combination_comboBox.setItemText(1, _translate("MainWindow", "soft-layer and Eva"))
         self.Combination_comboBox.setItemText(2, _translate("MainWindow", "steel and soft-layer and Eva"))
         self.Combination_comboBox.setItemText(3, _translate("MainWindow", "thick soft-layer"))
-        self.Combination_comboBox.setItemText(4, _translate("MainWindow", "thick steel"))
+        self.Combination_comboBox.setItemText(4, _translate("MainWindow", "thick isotropic solid"))
         self.SoftThickness_label.setText(_translate("MainWindow", "soft-layer"))
         self.HardThickness_label.setText(_translate("MainWindow", "hard-layer"))
         self.SteelThickness_label.setText(_translate("MainWindow", "steel"))
         self.TSoftThickness_label.setText(_translate("MainWindow", "thick-soft"))
-        self.TLayUpsApply_pushButton.setText(_translate("MainWindow", "Apply"))
+        self.TLayUpsApply_pushButton.setText(_translate("MainWindow", "Make"))
 
     def open_TLayUps(self):
-        """此函数为layup的apply按钮执行函数，
+        """
+        此函数为layup的apply按钮执行函数，
         self.Combination_comboBox.currentText()为复选框中选中的字符串，
         self.SoftThickness_lineEdit.text()为soft-layer内容
         self.SteelThickness_lineEdit.text()为steel内容
         self.HardThickness_lineEdit.text()为hard-layer内容
-        self.TSoftThickness_lineEdit.text()为"thick-soft内容"""
+        self.TSoftThickness_lineEdit.text()为"thick-soft内容
+        """
+        pass
 
     def open_Multiple(self):
-        """此函数为Multiple的apply按钮执行函数，
-        self.MNCTcomboBox.currentText()为复选框中选中的字符串"""
+        """
+        此函数为Multiple的apply按钮执行函数，
+        self.MNCTcomboBox.currentText()为复选框中选中的字符串
+        """
+        pass
 
 
 if __name__ == '__main__':
@@ -268,4 +274,4 @@ if __name__ == '__main__':
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
-    sys.exit(app.exec_())
+    # sys.exit(app.exec_())
