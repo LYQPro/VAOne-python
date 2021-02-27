@@ -140,22 +140,20 @@ class MainWindow(QMainWindow):
 
     def datanavigate(self):
         self.view = TableView()
-        print('ok')
         model = PandasModel(self.df_foam)
         self.view.DtableView.setModel(model)
         self.view.DtableView.resize(1500, 600)
         self.view.show()
 
     def apply(self):
-        trimPlateCaller(glvm.getv('layeredtrim'), reverse=1)
-
-
-
+        if glvm.getv('layeredtrim'):
+            trimPlateCaller(glvm.getv('layeredtrim'), reverse=1)
+        else:
+            QMessageBox.information(self, '提示', '还没有生成任何声学包')
 
     def make_layup(self, param):
         option = self.layer_up_option()
         # 确定参数的合法性 如何在参数不合法的情况下，正确使用缺省参数
-        # print(option)
         if option == "soft and hard-layer":
             self.layups['soft and hard-layer'].update(softHardLayerUp(param['soft_t']))
         elif option == "soft-layer and Eva":
