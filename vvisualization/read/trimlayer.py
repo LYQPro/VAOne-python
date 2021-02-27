@@ -76,7 +76,7 @@ class Fiber(Nct):
                       "SoftLayer1 HardLayer2"]  # 输入文件各列格式 最后一列表明软层1还是硬层2
         df.index = df["Name"]
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
-        print(df)
+        # print(df)
         print("import Excel done...")
         return df
 
@@ -120,7 +120,7 @@ class Foam(Nct):
                       "SoftLayer1 HardLayer2"]  # 输入文件各列格式 最后一列表明软层1还是硬层2
         df.index = df["Name"]
         df = df.sort_values(by=["SoftLayer1 HardLayer2"])  # 软层排在前 硬层排在后
-        print(df)
+        # print(df)
         print("import Excel done...")
         return df
 

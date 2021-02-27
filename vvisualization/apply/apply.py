@@ -136,7 +136,7 @@ def trimPlateProxy(platelist, reverse):
         print(f'have applied {trimname} to selected plates')
 
 
-def trimPlateCaller(trims, reverse) -> bool:
+def trimPlateCaller(trims, reverse=1) -> bool:
     """
     @type trims: dict
     @param reverse: int {0,1}

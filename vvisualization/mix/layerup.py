@@ -223,7 +223,7 @@ def MultipleNoiseControlTreatment(name, layerupdict, distribution: Optional[Dict
     db = pi_fNeoDatabaseGetCurrent()
     if pi_fNeoDatabaseFindByName(db, pi_fMultipleTrimGetClassID(), name):
         print(f'already have {name}')
-        return makenct.Nct.convert(db, 'MultipleTrim', name, 'MultipleTrim')
+        return {name: makenct.Nct.convert(db, 'MultipleTrim', name, 'MultipleTrim')}
     layerups = layerupdict
     mptrim = pi_fMultipleTrimCreate(db, name)
     if distribution is None:
@@ -239,6 +239,7 @@ def MultipleNoiseControlTreatment(name, layerupdict, distribution: Optional[Dict
                 pi_fMultipleTrimAddTrim(mptrim, pi_fConvertLayeredTrimTrim(layeredtrim[item[0]]), item[1])
         except KeyError:
             print('some layerup does not exist while creating mnct')
+
     panel = solidLayerUp(0.0009)
     pi_fMultipleTrimAddTrim(mptrim, pi_fConvertLayeredTrimTrim(panel['0.9mmSteelPanel']), 0.2)
     glvm.getv('mnct').update({name: mptrim})
