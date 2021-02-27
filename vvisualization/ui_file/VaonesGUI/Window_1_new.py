@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal, QDir, QAbstractTableModel, Qt
-from Ui_VMainWindow_new import Ui_MainWindow
+from Ui_VMainWindow_new_1 import Ui_MainWindow
 import pandas as pd
 from Ui_TableView import Ui_Form
 import importlib
@@ -146,8 +146,13 @@ class MainWindow(QMainWindow):
         self.view.show()
 
     def apply(self):
-        if glvm.getv('layeredtrim'):
-            trimPlateCaller(glvm.getv('layeredtrim'), reverse=1)
+        try:
+            revers = int(self.ui.reverse_lineEdit.text())
+        except ValueError:
+            revers = 0
+
+        if glvm.getv('mnct'):
+            trimPlateCaller(glvm.getv('mnct'), reverse=revers)
         else:
             QMessageBox.information(self, '提示', '还没有生成任何声学包')
 
