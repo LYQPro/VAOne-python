@@ -1,4 +1,3 @@
-# python_code_learning
-dev_VAOne；python_learning
-基于python的声振仿真软件VAOne二次开发
+# 基于python的声振仿真软件VAOne二次开发
+
 
