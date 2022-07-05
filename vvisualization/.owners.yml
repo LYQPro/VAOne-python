@@ -1,0 +1,13 @@
+# assign issues to owners auto
+assign:
+  issues: enabled
+  pull_requests: enabled
+  strategy:
+    # random
+    round-robin
+    # daily-shift-based
+  shedule:
+    '*/ 1 * * * *'
+  assignees:
+    - lyq10085
+    
