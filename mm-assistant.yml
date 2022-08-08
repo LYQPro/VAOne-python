@@ -1,0 +1,5 @@
+plugins:
+  lyq10085/VAOne-python:
+    plugins:
+    - assign
+    - approve
