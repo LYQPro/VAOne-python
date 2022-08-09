@@ -1,5 +1,0 @@
-plugins:
-  lyq/VAOne-python:
-    plugins:
-    - hello
-    - wrold
